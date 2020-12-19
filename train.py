@@ -8,7 +8,7 @@ import visdom
 
 if __name__ == '__main__':
     epoch = 50
-    batchsize = 5
+    batchsize = 1
     lr = 0.01
 
     train_data = VOC2012()

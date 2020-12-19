@@ -36,7 +36,7 @@ class VOC2012(Dataset):
             with open(DATASET_PATH + "ImageSets/Main/val.txt", 'r') as f:
                 self.filenames = [x.strip() for x in f]
         self.imgpath = DATASET_PATH + "JPEGImages/"  # 原始图像所在的路径
-        self.labelpath = "./labels/"  # 图像对应的label文件(.txt文件)的路径
+        self.labelpath = DATASET_PATH + "/labels/"  # 图像对应的label文件(.txt文件)的路径
         self.is_aug = is_aug
 
     def __len__(self):
@@ -81,7 +81,7 @@ class VOC2012(Dataset):
                 bbox[i * 5 + 4] = (bbox[i * 5 + 4] * h) / w
             # 此处可以写代码验证一下，查看padding后修改的bbox数值是否正确，在原图中画出bbox检验
 
-        labels = self.convert_bbox2labels(bbox)  # 将所有bbox的(cls,x,y,w,h)数据转换为训练时方便计算Loss的数据形式(7,7,5*B+cls_num)
+        labels = convert_bbox2labels(bbox)  # 将所有bbox的(cls,x,y,w,h)数据转换为训练时方便计算Loss的数据形式(7,7,5*B+cls_num)
         # 此处可以写代码验证一下，经过convert_bbox2labels函数后得到的labels变量中储存的数据是否正确
         labels = transforms.ToTensor()(labels)
         return img,labels
