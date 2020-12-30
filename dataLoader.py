@@ -2,7 +2,7 @@ from preprocess import *
 from torch.utils.data import Dataset
 import numpy as np
 from torchvision import transforms
-
+from matplotlib import pyplot as plt
 
 def convert_bbox2labels(bbox):
     """将bbox的(cls,x,y,w,h)数据转换为训练时方便计算Loss的数据形式(7,7,5*B+cls_num)
@@ -32,6 +32,7 @@ class VOC2012(Dataset):
         if is_train:
             with open(DATASET_PATH + "ImageSets/Main/train.txt", 'r') as f: # 调用包含训练集图像名称的txt文件
                 self.filenames = [x.strip() for x in f]
+                # print(self.filenames)
         else:
             with open(DATASET_PATH + "ImageSets/Main/val.txt", 'r') as f:
                 self.filenames = [x.strip() for x in f]
@@ -43,7 +44,9 @@ class VOC2012(Dataset):
         return len(self.filenames)
 
     def __getitem__(self, item):
-        img = cv2.imread(self.imgpath+self.filenames[item]+".jpg")  # 读取原始图像
+        img = cv2.imread(self.imgpath+self.filenames[item]+".jpg")
+        # plt.imshow(img)# 读取原始图像
+        # plt.show()
         h,w = img.shape[0:2]
         input_size = 448  # 输入YOLOv1网络的图像尺寸为448x448
         # 因为数据集内原始图像的尺寸是不定的，所以需要进行适当的padding，将原始图像padding成宽高一致的正方形
@@ -84,6 +87,8 @@ class VOC2012(Dataset):
         labels = convert_bbox2labels(bbox)  # 将所有bbox的(cls,x,y,w,h)数据转换为训练时方便计算Loss的数据形式(7,7,5*B+cls_num)
         # 此处可以写代码验证一下，经过convert_bbox2labels函数后得到的labels变量中储存的数据是否正确
         labels = transforms.ToTensor()(labels)
+        # plt.imshow(np.transpose(img, [1,2,0]))
+        # plt.show()
         return img,labels
 
 

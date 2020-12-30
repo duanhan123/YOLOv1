@@ -38,10 +38,12 @@ def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
     :param conf_thresh: cls-specific confidence score的阈值
     :param iou_thresh: NMS算法中iou的阈值
     """
+    # print(bbox)
     n = bbox.size()[0]
     bbox_prob = bbox[:,5:].clone()  # 类别预测的条件概率
     bbox_confi = bbox[:, 4].clone().unsqueeze(1).expand_as(bbox_prob)  # 预测置信度
     bbox_cls_spec_conf = bbox_confi*bbox_prob  # 置信度*类别条件概率=cls-specific confidence score整合了是否有物体及是什么物体的两种信息
+    # print(bbox_cls_spec_conf.max())
     bbox_cls_spec_conf[bbox_cls_spec_conf<=conf_thresh] = 0  # 将低于阈值的bbox忽略
     for c in range(20):
         rank = torch.sort(bbox_cls_spec_conf[:,c],descending=True).indices
@@ -52,10 +54,13 @@ def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
                         iou = calculate_iou(bbox[rank[i],0:4],bbox[rank[j],0:4])
                         if iou > iou_thresh:  # 根据iou进行非极大值抑制抑制
                             bbox_cls_spec_conf[rank[j],c] = 0
-    bbox = bbox[torch.max(bbox_cls_spec_conf,dim=1).values>0]  # 将20个类别中最大的cls-specific confidence score为0的bbox都排除
+    # print(sum(bbox_cls_spec_conf > 0))
+    bbox = bbox[torch.max(bbox_cls_spec_conf,dim=1).values > 0]  # 将20个类别中最大的cls-specific confidence score为0的bbox都排除
+    print(sum(bbox > 0))
     bbox_cls_spec_conf = bbox_cls_spec_conf[torch.max(bbox_cls_spec_conf,dim=1).values>0]
     res = torch.ones((bbox.size()[0],6))
     res[:,1:5] = bbox[:,0:4]  # 储存最后的bbox坐标信息
+    # print(bbox)
     res[:,0] = torch.argmax(bbox[:,5:],dim=1).int()  # 储存bbox对应的类别信息
     res[:,5] = torch.max(bbox_cls_spec_conf,dim=1).values  # 储存bbox对应的class-specific confidence scores
     return res
@@ -73,12 +78,13 @@ def draw_bbox(img,bbox):
     """
     h,w = img.shape[0:2]
     n = bbox.size()[0]
-    print(bbox)
+    # print(bbox)
     for i in range(n):
-        p1 = (w*bbox[i,1], h*bbox[i,2])
-        p2 = (w*bbox[i,3], h*bbox[i,4])
+        p1 = (int(w*bbox[i,1].item()), int(h*bbox[i,2].item()))
+        p2 = (int(w*bbox[i,3].item()), int(h*bbox[i,4].item()))
         cls_name = CLASSES[int(bbox[i,0])]
         confidence = bbox[i,5]
+        img=np.ascontiguousarray(img)
         cv2.rectangle(img,p1,p2,color=COLOR[int(bbox[i,0])])
         cv2.putText(img,cls_name,p1,cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,255))
     cv2.imshow("bbox",img)
@@ -90,15 +96,17 @@ def draw_bbox(img,bbox):
 
 
 if __name__ == '__main__':
-    val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=False)
-    model = torch.load("./models_pkl/YOLOv1_epoch40.pkl")  # 加载训练好的模型
+    val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=True)
+    model = torch.load("./models_pkl/YOLOv1_epoch1.pkl")  # 加载训练好的模型
     for i,(inputs,labels) in enumerate(val_dataloader):
-        inputs = inputs.cuda()
+        # inputs = inputs.cuda()
         # 以下代码是测试labels2bbox函数的时候再用
-        # labels = labels.float().cuda()
+        # labels = labels.float()
         # labels = labels.squeeze(dim=0)
         # labels = labels.permute((1,2,0))
+        # print(inputs,labels)
         pred = model(inputs)  # pred的尺寸是(1,30,7,7)
+        # print(pred)
         pred = pred.squeeze(dim=0)  # 压缩为(30,7,7)
         pred = pred.permute((1,2,0))  # 转换为(7,7,30)
 
@@ -110,5 +118,5 @@ if __name__ == '__main__':
         img = 255*img  # 将图像的数值从(0,1)映射到(0,255)并转为非负整形
         img = img.astype(np.uint8)
         draw_bbox(img,bbox.cpu())  # 将网络预测结果进行可视化，将bbox画在原图中，可以很直观的观察结果
-        print(bbox.size(),bbox)
+        # print(bbox.size(),bbox)
         input()

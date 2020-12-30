@@ -7,12 +7,15 @@ import visdom
 
 
 if __name__ == '__main__':
-    epoch = 1
+    epoch = 50
     batchsize = 16
     lr = 0.001
     # torch.cuda.empty_cache()
     train_data = VOC2012()
     train_dataloader = DataLoader(VOC2012(is_train=True),batch_size=batchsize,shuffle=True)
+    # print(sum(train_data[1][0][0] > 0))
+    # plt.imshow(np.transpose(train_data[1][0],[1,2,0]))
+    # plt.show()
 
     # model = YOLOv1_resnet().cuda()
     model = YOLOv1_resnet()
@@ -34,6 +37,7 @@ if __name__ == '__main__':
         # yl = torch.Tensor([0]).cuda()
         yl = torch.Tensor([0])
         for i,(inputs,labels) in enumerate(train_dataloader):
+            # print(inputs)
             # inputs = inputs.cuda()
             # labels = labels.float().cuda()
             labels = labels.float()
