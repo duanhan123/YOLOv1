@@ -13,21 +13,21 @@ class YOLOv1_resnet(nn.Module):
         self.Conv_layers = nn.Sequential(
             nn.Conv2d(resnet_out_channel,1024,3,padding=1),
             nn.BatchNorm2d(1024),  # 为了加快训练，这里增加了BN层，原论文里YOLOv1是没有的
-            nn.LeakyReLU(),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(1024,1024,3,stride=2,padding=1),
             nn.BatchNorm2d(1024),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(1024, 1024, 3, padding=1),
             nn.BatchNorm2d(1024),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(1024, 1024, 3, padding=1),
             nn.BatchNorm2d(1024),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(inplace=True),
         )
         # 以下是YOLOv1的最后2个全连接层
         self.Conn_layers = nn.Sequential(
             nn.Linear(7*7*1024,4096),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(4096,7*7*30),
             nn.Sigmoid()  # 增加sigmoid函数是为了将输出全部映射到(0,1)之间，因为如果出现负数或太大的数，后续计算loss会很麻烦
         )

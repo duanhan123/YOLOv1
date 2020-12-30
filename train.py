@@ -7,15 +7,15 @@ import visdom
 
 
 if __name__ == '__main__':
-    epoch = 50
-    batchsize = 1
-    lr = 0.01
-
+    epoch = 1
+    batchsize = 16
+    lr = 0.001
+    # torch.cuda.empty_cache()
     train_data = VOC2012()
     train_dataloader = DataLoader(VOC2012(is_train=True),batch_size=batchsize,shuffle=True)
 
-    model = YOLOv1_resnet().cuda()
-    # model = YOLOv1_resnet()
+    # model = YOLOv1_resnet().cuda()
+    model = YOLOv1_resnet()
     # model.children()里是按模块(Sequential)提取的子模块，而不是具体到每个层，具体可以参见pytorch帮助文档
     # 冻结resnet34特征提取层，特征提取层不参与参数更新
     for layer in model.children():
@@ -31,10 +31,12 @@ if __name__ == '__main__':
 
     for e in range(epoch):
         model.train()
-        yl = torch.Tensor([0]).cuda()
+        # yl = torch.Tensor([0]).cuda()
+        yl = torch.Tensor([0])
         for i,(inputs,labels) in enumerate(train_dataloader):
-            inputs = inputs.cuda()
-            labels = labels.float().cuda()
+            # inputs = inputs.cuda()
+            # labels = labels.float().cuda()
+            labels = labels.float()
             pred = model(inputs)
             loss = criterion(pred, labels)
             optimizer.zero_grad()
@@ -45,6 +47,6 @@ if __name__ == '__main__':
             yl = yl + loss
             if is_vis and (i+1)%100==0:
                 vis.line(np.array([yl.cpu().item()/(i+1)]),np.array([i+e*len(train_data)//batchsize]),win=viswin1,update='append')
-        if (e+1)%10==0:
+        if e==0:
             torch.save(model,"./models_pkl/YOLOv1_epoch"+str(e+1)+".pkl")
             # compute_val_map(model)
