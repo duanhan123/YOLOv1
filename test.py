@@ -38,13 +38,15 @@ def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
     :param conf_thresh: cls-specific confidence score的阈值
     :param iou_thresh: NMS算法中iou的阈值
     """
-    # print(bbox)
+    # print(bbox.size())
     n = bbox.size()[0]
     bbox_prob = bbox[:,5:].clone()  # 类别预测的条件概率
     bbox_confi = bbox[:, 4].clone().unsqueeze(1).expand_as(bbox_prob)  # 预测置信度
     bbox_cls_spec_conf = bbox_confi*bbox_prob  # 置信度*类别条件概率=cls-specific confidence score整合了是否有物体及是什么物体的两种信息
-    # print(bbox_cls_spec_conf.max())
+    # print(bbox_confi.max())
+    # print(bbox_prob.max())
     bbox_cls_spec_conf[bbox_cls_spec_conf<=conf_thresh] = 0  # 将低于阈值的bbox忽略
+    # print(sum(bbox_cls_spec_conf == 0))
     for c in range(20):
         rank = torch.sort(bbox_cls_spec_conf[:,c],descending=True).indices
         for i in range(98):
@@ -54,9 +56,9 @@ def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
                         iou = calculate_iou(bbox[rank[i],0:4],bbox[rank[j],0:4])
                         if iou > iou_thresh:  # 根据iou进行非极大值抑制抑制
                             bbox_cls_spec_conf[rank[j],c] = 0
-    # print(sum(bbox_cls_spec_conf > 0))
+    # print(sum(bbox_cls_spec_conf == 0))
     bbox = bbox[torch.max(bbox_cls_spec_conf,dim=1).values > 0]  # 将20个类别中最大的cls-specific confidence score为0的bbox都排除
-    print(sum(bbox > 0))
+    # print(sum(bbox > 0))
     bbox_cls_spec_conf = bbox_cls_spec_conf[torch.max(bbox_cls_spec_conf,dim=1).values>0]
     res = torch.ones((bbox.size()[0],6))
     res[:,1:5] = bbox[:,0:4]  # 储存最后的bbox坐标信息
@@ -97,14 +99,14 @@ def draw_bbox(img,bbox):
 
 if __name__ == '__main__':
     val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=True)
-    model = torch.load("./models_pkl/YOLOv1_epoch1.pkl")  # 加载训练好的模型
+    model = torch.load("./models_pkl/YOLOv1_epoch50.pkl")  # 加载训练好的模型
     for i,(inputs,labels) in enumerate(val_dataloader):
         # inputs = inputs.cuda()
         # 以下代码是测试labels2bbox函数的时候再用
         # labels = labels.float()
         # labels = labels.squeeze(dim=0)
         # labels = labels.permute((1,2,0))
-        # print(inputs,labels)
+        # print(inputs,labels)c
         pred = model(inputs)  # pred的尺寸是(1,30,7,7)
         # print(pred)
         pred = pred.squeeze(dim=0)  # 压缩为(30,7,7)

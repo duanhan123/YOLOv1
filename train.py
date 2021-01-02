@@ -9,7 +9,7 @@ import visdom
 if __name__ == '__main__':
     epoch = 50
     batchsize = 16
-    lr = 0.001
+    lr = 0.0001
     # torch.cuda.empty_cache()
     train_data = VOC2012()
     train_dataloader = DataLoader(VOC2012(is_train=True),batch_size=batchsize,shuffle=True)
