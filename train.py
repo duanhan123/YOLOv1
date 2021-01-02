@@ -8,7 +8,7 @@ import visdom
 
 if __name__ == '__main__':
     epoch = 50
-    batchsize = 16
+    batchsize = 64
     lr = 0.0001
     # torch.cuda.empty_cache()
     train_data = VOC2012()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
         layer.requires_grad = False
         break
     criterion = Loss_yolov1()
-    optimizer = torch.optim.SGD(model.parameters(),lr=lr,momentum=0.9,weight_decay=0.0005)
+    optimizer = torch.optim.SGD(model.parameters(),lr=lr,momentum=0.9,weight_decay=0.0001)
 
     is_vis = False  # 是否进行可视化，如果没有visdom可以将其设置为false
     if is_vis:

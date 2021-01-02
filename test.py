@@ -14,7 +14,7 @@ def labels2bbox(matrix):
     """
     if matrix.size()[0:2]!=(7,7):
         raise ValueError("Error: Wrong labels size:",matrix.size())
-    bbox = torch.zeros((98,25))
+    bbox = torch.zeros((98,9))
     # 先把7*7*30的数据转变为bbox的(98,25)的格式，其中，bbox信息格式从(px,py,w,h)转换为(x1,y1,x2,y2),方便计算iou
     for i in range(7):  # i是网格的行方向(y方向)
         for j in range(7):  # j是网格的列方向(x方向)
@@ -33,7 +33,7 @@ def labels2bbox(matrix):
     return NMS(bbox)  # 对所有98个bbox执行NMS算法，清理cls-specific confidence score较低以及iou重合度过高的bbox
 
 
-def NMS(bbox, conf_thresh=0.06, iou_thresh=0.3):
+def NMS(bbox, conf_thresh=0.035, iou_thresh=0.3):
     """bbox数据格式是(n,25),前4个是(x1,y1,x2,y2)的坐标信息，第5个是置信度，后20个是类别概率
     :param conf_thresh: cls-specific confidence score的阈值
     :param iou_thresh: NMS算法中iou的阈值
@@ -48,7 +48,7 @@ def NMS(bbox, conf_thresh=0.06, iou_thresh=0.3):
     print(bbox_cls_spec_conf.max())
     bbox_cls_spec_conf[bbox_cls_spec_conf<=conf_thresh] = 0  # 将低于阈值的bbox忽略
     # print(sum(bbox_cls_spec_conf == 0))
-    for c in range(20):
+    for c in range(4):
         rank = torch.sort(bbox_cls_spec_conf[:,c],descending=True).indices
         for i in range(98):
             if bbox_cls_spec_conf[rank[i],c]!=0:
@@ -99,14 +99,14 @@ def draw_bbox(img,bbox):
 
 
 if __name__ == '__main__':
-    val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=True)
+    val_dataloader = DataLoader(VOC2012(is_train=True), batch_size=1, shuffle=True)
     model = torch.load("./models_pkl/defect_YOLOv1_epoch50.pkl")  # 加载训练好的模型
     for i,(inputs,labels) in enumerate(val_dataloader):
         # inputs = inputs.cuda()
         # 以下代码是测试labels2bbox函数的时候再用
-        # labels = labels.float()
-        # labels = labels.squeeze(dim=0)
-        # labels = labels.permute((1,2,0))
+        labels = labels.float()
+        labels = labels.squeeze(dim=0)
+        labels = labels.permute((1,2,0))
         # print(inputs,labels)c
         pred = model(inputs)  # pred的尺寸是(1,30,7,7)
         # print(pred)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         pred = pred.permute((1,2,0))  # 转换为(7,7,30)
 
         ## 测试labels2bbox时，使用 labels作为labels2bbox2函数的输入
-        bbox = labels2bbox(pred)  # 此处可以用labels代替pred，测试一下输出的bbox是否和标签一样，从而检查labels2bbox函数是否正确。当然，还要注意将数据集改成训练集而不是测试集，因为测试集没有labels。
+        bbox = labels2bbox(labels)  # 此处可以用labels代替pred，测试一下输出的bbox是否和标签一样，从而检查labels2bbox函数是否正确。当然，还要注意将数据集改成训练集而不是测试集，因为测试集没有labels。
         inputs = inputs.squeeze(dim=0)  # 输入图像的尺寸是(1,3,448,448),压缩为(3,448,448)
         inputs = inputs.permute((1,2,0))  # 转换为(448,448,3)
         img = inputs.cpu().numpy()

@@ -28,7 +28,7 @@ class YOLOv1_resnet(nn.Module):
         self.Conn_layers = nn.Sequential(
             nn.Linear(7*7*1024,4096),
             nn.LeakyReLU(inplace=True),
-            nn.Linear(4096,7*7*30),
+            nn.Linear(4096,7*7*14),
             nn.Sigmoid()  # 增加sigmoid函数是为了将输出全部映射到(0,1)之间，因为如果出现负数或太大的数，后续计算loss会很麻烦
         )
 

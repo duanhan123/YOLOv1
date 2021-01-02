@@ -40,7 +40,7 @@ class Loss_yolov1(nn.Module):
         """
         num_gridx, num_gridy = labels.size()[-2:]  # 划分网格数量
         num_b = 2  # 每个网格的bbox数量
-        num_cls = 20  # 类别数量
+        num_cls = 4 # 类别数量
         noobj_confi_loss = 0.  # 不含目标的网格损失(只有置信度损失)
         coor_loss = 0.  # 含有目标的bbox的坐标损失
         obj_confi_loss = 0.  # 含有目标的bbox的置信度损失

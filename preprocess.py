@@ -1,8 +1,6 @@
 
 
-CLASSES = ['type1', 'type2', 'type3', 'type4', 'dog', 'horse', 'sheep',
-           'aeroplane', 'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train',
-           'bottle', 'chair', 'dining table', 'potted plant', 'sofa', 'tvmonitor']
+CLASSES = ['type1', 'type2', 'type3', 'type4']
 
 NUM_BBOX = 2
 
