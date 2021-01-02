@@ -99,14 +99,14 @@ def draw_bbox(img,bbox):
 
 
 if __name__ == '__main__':
-    val_dataloader = DataLoader(VOC2012(is_train=True), batch_size=1, shuffle=True)
+    val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=True)
     model = torch.load("./models_pkl/defect_YOLOv1_epoch50.pkl")  # 加载训练好的模型
     for i,(inputs,labels) in enumerate(val_dataloader):
         # inputs = inputs.cuda()
         # 以下代码是测试labels2bbox函数的时候再用
-        labels = labels.float()
-        labels = labels.squeeze(dim=0)
-        labels = labels.permute((1,2,0))
+        # labels = labels.float()
+        # labels = labels.squeeze(dim=0)
+        # labels = labels.permute((1,2,0))
         # print(inputs,labels)c
         pred = model(inputs)  # pred的尺寸是(1,30,7,7)
         # print(pred)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         pred = pred.permute((1,2,0))  # 转换为(7,7,30)
 
         ## 测试labels2bbox时，使用 labels作为labels2bbox2函数的输入
-        bbox = labels2bbox(labels)  # 此处可以用labels代替pred，测试一下输出的bbox是否和标签一样，从而检查labels2bbox函数是否正确。当然，还要注意将数据集改成训练集而不是测试集，因为测试集没有labels。
+        bbox = labels2bbox(pred)  # 此处可以用labels代替pred，测试一下输出的bbox是否和标签一样，从而检查labels2bbox函数是否正确。当然，还要注意将数据集改成训练集而不是测试集，因为测试集没有labels。
         inputs = inputs.squeeze(dim=0)  # 输入图像的尺寸是(1,3,448,448),压缩为(3,448,448)
         inputs = inputs.permute((1,2,0))  # 转换为(448,448,3)
         img = inputs.cpu().numpy()
