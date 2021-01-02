@@ -33,7 +33,7 @@ def labels2bbox(matrix):
     return NMS(bbox)  # 对所有98个bbox执行NMS算法，清理cls-specific confidence score较低以及iou重合度过高的bbox
 
 
-def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
+def NMS(bbox, conf_thresh=0.06, iou_thresh=0.3):
     """bbox数据格式是(n,25),前4个是(x1,y1,x2,y2)的坐标信息，第5个是置信度，后20个是类别概率
     :param conf_thresh: cls-specific confidence score的阈值
     :param iou_thresh: NMS算法中iou的阈值
@@ -45,6 +45,7 @@ def NMS(bbox, conf_thresh=0.1, iou_thresh=0.3):
     bbox_cls_spec_conf = bbox_confi*bbox_prob  # 置信度*类别条件概率=cls-specific confidence score整合了是否有物体及是什么物体的两种信息
     # print(bbox_confi.max())
     # print(bbox_prob.max())
+    print(bbox_cls_spec_conf.max())
     bbox_cls_spec_conf[bbox_cls_spec_conf<=conf_thresh] = 0  # 将低于阈值的bbox忽略
     # print(sum(bbox_cls_spec_conf == 0))
     for c in range(20):
@@ -119,6 +120,8 @@ if __name__ == '__main__':
         img = inputs.cpu().numpy()
         img = 255*img  # 将图像的数值从(0,1)映射到(0,255)并转为非负整形
         img = img.astype(np.uint8)
+        # plt.imshow(img)
+        # plt.show()
         draw_bbox(img,bbox.cpu())  # 将网络预测结果进行可视化，将bbox画在原图中，可以很直观的观察结果
         # print(bbox.size(),bbox)
         input()
