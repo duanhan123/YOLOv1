@@ -99,7 +99,7 @@ def draw_bbox(img,bbox):
 
 if __name__ == '__main__':
     val_dataloader = DataLoader(VOC2012(is_train=False), batch_size=1, shuffle=True)
-    model = torch.load("./models_pkl/YOLOv1_epoch50.pkl")  # 加载训练好的模型
+    model = torch.load("./models_pkl/defect_YOLOv1_epoch50.pkl")  # 加载训练好的模型
     for i,(inputs,labels) in enumerate(val_dataloader):
         # inputs = inputs.cuda()
         # 以下代码是测试labels2bbox函数的时候再用

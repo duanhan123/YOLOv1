@@ -30,14 +30,14 @@ class VOC2012(Dataset):
         """
         self.filenames = []  # 储存数据集的文件名称
         if is_train:
-            with open(DATASET_PATH + "ImageSets/Main/train.txt", 'r') as f: # 调用包含训练集图像名称的txt文件
+            with open(DATASET_PATH + "train.txt", 'r') as f: # 调用包含训练集图像名称的txt文件
                 self.filenames = [x.strip() for x in f]
                 # print(self.filenames)
         else:
-            with open(DATASET_PATH + "ImageSets/Main/val.txt", 'r') as f:
+            with open(DATASET_PATH + "val.txt", 'r') as f:
                 self.filenames = [x.strip() for x in f]
-        self.imgpath = DATASET_PATH + "JPEGImages/"  # 原始图像所在的路径
-        self.labelpath = DATASET_PATH + "/labels/"  # 图像对应的label文件(.txt文件)的路径
+        self.imgpath = DATASET_PATH + "images/"  # 原始图像所在的路径
+        self.labelpath = DATASET_PATH + "labels/"  # 图像对应的label文件(.txt文件)的路径
         self.is_aug = is_aug
 
     def __len__(self):

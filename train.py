@@ -52,5 +52,5 @@ if __name__ == '__main__':
             if is_vis and (i+1)%100==0:
                 vis.line(np.array([yl.cpu().item()/(i+1)]),np.array([i+e*len(train_data)//batchsize]),win=viswin1,update='append')
         # if e==0:
-        torch.save(model,"./models_pkl/YOLOv1_epoch"+str(e+1)+".pkl")
+        torch.save(model,"./models_pkl/defect_YOLOv1_epoch"+str(e+1)+".pkl")
             # compute_val_map(model)

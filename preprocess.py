@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import os
 import cv2
 
-DATASET_PATH = 'VOCdevkit/VOC2012/'
+DATASET_PATH = 'data/'
 
 
 def convert(size, box):
